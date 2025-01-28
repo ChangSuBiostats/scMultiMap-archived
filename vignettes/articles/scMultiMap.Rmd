@@ -83,6 +83,7 @@ wget https://cf.10xgenomics.com/samples/cell-arc/2.0.0/10k_PBMC_Multiome_nextgem
 
 ## 2.2 Demo of scMultiMap on CD14 Monocytes
 
+<<<<<<< HEAD
 
 ``` r
 # set it to the directory where data are saved
@@ -91,6 +92,11 @@ data_dir <- '../../../data'
 
 ``` r
 pbmc <- readRDS(sprintf('%s/processed_seurat_obj_PBMC_10k_nextgem.rds', data_dir))
+=======
+We load the data generated above:
+```{r eval = FALSE, include = TRUE}
+pbmc <- readRDS('processed_seurat_obj_PBMC_10k.rds')
+>>>>>>> 456f7dd... fix typo in r file name
 # in this example, we focus on CD14 monocytes:
 pbmc_cd14 <- subset(pbmc, predicted.id == 'CD14 Mono')
 print(pbmc_cd14)
@@ -100,7 +106,6 @@ print(pbmc_cd14)
 pbmc_cd14 <- readRDS(sprintf('%s/CD14_obj.rds', data_dir))
 print(pbmc_cd14)
 ```
-
 
 
 We choose to study the top $2{,}000$ highly expressed genes and top $20{,}000$ highly accessible peaks in CD14 Monocytes, and use a cis-region of width 1Mb to define candidate peak-gene pairs.
@@ -114,6 +119,12 @@ pairs_df <- get_top_peak_gene_pairs(pbmc_cd14,
                                     gene_assay = 'RNA', # name of the gene assay
                                     peak_assay = 'peaks_ct') # name of the peak assay
 head(pairs_df)
+<<<<<<< HEAD
+=======
+dim(pairs_df)
+```
+>>>>>>> 456f7dd... fix typo in r file name
+
 
 #>     gene                    peak
 #> 1 MALAT1 chr11-65614961-65616132
@@ -130,6 +141,7 @@ Here, we load 32,296 candidate peak-gene pairs generated based on the criterion 
 
 Nect, we run `scMultiMap` to identify significantly associated peak-gene pairs
 
+<<<<<<< HEAD
 
 ``` r
 scMultiMap_res <- scMultiMap(pbmc_cd14, pairs_df,
@@ -149,6 +161,14 @@ head(scMultiMap_res)
 #> 4 MALAT1 chr11-65496994-65497909 0.08524652 1.7210237 2.334859e-08 0.4901409 0.15467261
 #> 5 MALAT1 chr11-65569536-65570572 0.18919341 1.3129690 1.776141e-08 0.6525889 0.09259916
 #> 6 MALAT1 chr11-65711306-65712797 0.25426633 1.1400479 1.496624e-08 0.7139586 0.09048044
+=======
+```{r eval=TRUE, include=TRUE}
+res <- scMultiMap(pbmc_cd14, pairs_df, 
+                  gene_assay = 'RNA',
+                  peak_assay = 'peaks_ct')
+head(res)
+dim(res)
+>>>>>>> 456f7dd... fix typo in r file name
 ```
 
 * Running scMultiMap on the dataset above will take a few minutes, depending on the machine.
@@ -244,3 +264,4 @@ signac_res$padj <- p.adjust(signac_res$pvalue, method = 'BH')
 signac_overlap <- validate_with_assay(signac_res, sig_assay_gr)
 #> [1] "p value from one-sided Fisher exact test: 7.61e-02, #overlap: 59, odds ratio: 1.23"
 ```
+
