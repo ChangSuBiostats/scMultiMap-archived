@@ -96,6 +96,10 @@ pbmc_cd14 <- subset(pbmc, predicted.id == 'CD14 Mono')
 print(pbmc_cd14)
 ```
 
+```{r eval=TRUE, include=FALSE}
+pbmc_cd14 <- readRDS(sprintf('%s/CD14_obj.rds', data_dir))
+print(pbmc_cd14)
+```
 
 
 
@@ -110,6 +114,7 @@ pairs_df <- get_top_peak_gene_pairs(pbmc_cd14,
                                     gene_assay = 'RNA', # name of the gene assay
                                     peak_assay = 'peaks_ct') # name of the peak assay
 head(pairs_df)
+
 #>     gene                    peak
 #> 1 MALAT1 chr11-65614961-65616132
 #> 2 MALAT1 chr11-65918502-65920142
@@ -119,7 +124,7 @@ head(pairs_df)
 #> 6 MALAT1 chr11-65711306-65712797
 dim(pairs_df)
 #> [1] 32296     2
-```
+
 
 Here, we load 32,296 candidate peak-gene pairs generated based on the criterion above. `peak_gene_pairs` is a dataframe includes 32,296 rows for pairs and two columns for gene and peak names, respectively. Generally, these pairs should be formed and provided by the users.
 
