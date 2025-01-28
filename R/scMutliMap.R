@@ -55,6 +55,7 @@ scMultiMap <- function(obj, pairs_df,
                        seq_depth_list = NULL,
                        p.adjust.method = 'BH',
                        irls = T, verbose = F){
+  start_time <- Sys.time()
   ##
   # prepare input data for scMultiMap: count and sequencing depth
   ##
@@ -103,10 +104,10 @@ scMultiMap <- function(obj, pairs_df,
     }
   }
   # run IRLS for each modality, respectively
-  print('Start step 1: IRLS')
+  message('Start step 1: IRLS')
   for(i in 1:2){
     mod <- assay_names[i]
-    print(sprintf('Start IRLS for %s', mod))
+    message(sprintf('Start IRLS for %s', mod))
     irls_res[[mod]] <- scMultiMap_IRLS(count_list[[mod]],
                                        seq_depth_list[[mod]],
                                        bsample=bsample, irls=irls,
@@ -116,7 +117,7 @@ scMultiMap <- function(obj, pairs_df,
   ##
   # scMultiMap step 2: WLS to infer peak-gene association
   ##
-  print('Start step 2: WLS')
+  message('Start step 2: WLS')
   wls_res <- scMultiMap_WLS(count_list,
                             seq_depth_list,
                             pairs_df,
@@ -142,5 +143,11 @@ scMultiMap <- function(obj, pairs_df,
   wls_res$cor[wls_res$cor > 1] <- 1
   wls_res$cor[wls_res$cor < -1] <- -1
   rownames(wls_res) <- NULL
+
+  end_time <- Sys.time()
+  elapsed <- difftime(end_time, start_time, units = "secs")
+  message(sprintf("scMultiMap elapsed time: %02d:%02d (mm:ss)\n",
+              (as.integer(elapsed) %% 3600) %/% 60, # Minutes
+              as.integer(elapsed) %% 60))        # Seconds
   return(wls_res)
 }
