@@ -58,6 +58,7 @@ wget https://cf.10xgenomics.com/samples/cell-arc/2.0.0/pbmc_granulocyte_sorted_1
 
 ## 2.2 Demo of scMultiMap on CD14 Monocytes
 
+We load the data generated above:
 ```{r eval = FALSE, include = TRUE}
 pbmc <- readRDS('processed_seurat_obj_PBMC_10k.rds')
 # in this example, we focus on CD14 monocytes:
@@ -65,7 +66,7 @@ pbmc_cd14 <- subset(pbmc, predicted.id == 'CD14 Mono')
 print(pbmc_cd14)
 ```
 ```{r eval=TRUE, include=FALSE}
-pbmc_cd14 <- readRDS('../../../data/CD14_obj.rds')
+pbmc_cd14 <- readRDS('../../../data/CD14_obj.rds') 
 print(pbmc_cd14)
 ```
 
@@ -81,6 +82,7 @@ pairs_df <- get_top_peak_gene_pairs(pbmc_cd14,
                                     gene_assay = 'RNA', 
                                     peak_assay = 'peaks_ct') # name of the peak assay
 head(pairs_df)
+dim(pairs_df)
 ```
 
 Here, we load 30,635 candidate peak-gene pairs generated based on the criterion above. `peak_gene_pairs` is a dataframe includes 30,635 rows for pairs and two columns for gene and peak names, respectively. Generally, these pairs should be formed and provided by the users.
@@ -90,8 +92,9 @@ Nect, we run `scMultiMap` to identify significantly associated peak-gene pairs
 ```{r eval=TRUE, include=TRUE}
 res <- scMultiMap(pbmc_cd14, pairs_df, 
                   gene_assay = 'RNA',
-                  peak_assay = 'peak')
+                  peak_assay = 'peaks_ct')
 head(res)
+dim(res)
 ```
 
 * Running scMultiMap on 3,146 cells for 30,635 peak-gene pairs will take a few minutes, depending on the machine.
