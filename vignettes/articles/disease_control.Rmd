@@ -1,0 +1,64 @@
+---
+title: "scMultiMap for disease-control studies"
+---
+
+
+
+This vignette illustrates applying `scMultiMap` to infer peak-gene pairs that are differentially associated using single-cell multimodal data from disease-control studies.
+
+
+``` r
+library(scMultiMap)
+library(Signac)
+library(Seurat)
+```
+
+In [scMultiMap manuscript](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1), we applied a permutation procedure to identify significantly differentially associated peak-gene pairs between microglia from healthy control subjects and subjects with Alzheimer's disease (Results section "scMultiMap mapped GWAS variants of Alzheimer’s disease to target genes in microglia"). We illustrate the codes for this analysis here.
+
+# 1. Load pre-processed data
+
+We used the same brain single-cell multiome dataset as in the paper, which was downloaded from [GSE214979](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE214979). We further re-called peaks by cell types with MACS2 using the codes at the [scMultiMap reproducibility Github repo](https://github.com/ChangSuBiostats/scMultiMap_analysis/preprocessing/preprocess_10x_PBMC_data.R). Calling peaks by cell types generates cell-type-specific peaks that better represent candidate enhancers than calling peaks with all cell types merged, which may obscure signals from less abundant cell types such as microglia. Using MACS2 provides the fragment counts necessary for running scMultiMap (see discussion [here](scMultiMap.html)).
+
+
+``` r
+data_dir <- '../../../data'
+obj <- readRDS(sprintf('%s/processed_AD_DLPFC_15.rds', data_dir))
+# subset to microglia
+ct <- 'Microglia'
+ct_obj <- subset(x = obj, subset = predicted.id == ct)
+```
+
+
+
+In this analysis, we study the top $5{,}000$ highly expressed genes and top $50{,}000$ highly accessible peaks in CD14 Monocytes, and use a cis-region of width 1Mb to define candidate peak-gene pairs.
+
+
+``` r
+# We used only control cells in the original study to select peak-gene pairs for scMultiMap analysis
+# For reproducing the results in the paper, we keep it consistent here,
+#  while recognizing that it also makes sense to use microglia from all samples.
+pairs_df <- get_top_peak_gene_pairs(subset(x = ct_obj, subset = Diagnosis == 'Unaffected'),
+                                    gene_top=5000, peak_top=50000,
+                                    distance = 5e+5,
+                                    gene_assay = 'RNA', # name of the gene assay
+                                    peak_assay = 'peaks') # name of the peak assay
+```
+
+Here, we generated 135401 candidate peak-gene pairs generated based on the criterion above. Generally, the pairs to be studied could also be customized and supplied by users.
+
+# 3. Differential association analysis
+
+First, we obtain peak-gene associations in microglia from the control and the Alzheimer's disease groups, respectively.
+
+
+
+
+
+
+
+
+
+
+
+
+

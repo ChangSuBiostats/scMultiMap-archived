@@ -50,3 +50,63 @@ get_top_peak_gene_pairs <- function(obj, gene_top=2000, peak_top=20000,
                    peak = rownames(peak_distance_matrix)[summ$i])
   return(df)
 }
+
+
+#' validate_with_assay
+#'
+#' Validate peak-gene associations computed with single-cell multimodal data
+#' by evaluating the consistency with orthogonal assay.
+#'
+#' @param res_df A data frame of peak-gene associations results, containing columns of `gene`, `peak`, and pvar (see below).
+#' @param sig_assay_gr A GRanges object for associated peak-gene pairs from other orthogonal assays, containing `gene` as a column in metadata
+#' @param pvar Which variable in `res_df` to use for claiming significant associations. Default to 'padj'.
+#' @param p_cutoff Cutoff for significance based on `pvar`. Default to 0.2.
+#'
+#' @return
+#' A named numeric vector that summarizes the overlap between `res_df` results and `sig_assay_gr` results
+#' \describe{
+#'   \item{pval}{p value from one-sided Fisher exact test}
+#'   \item{n_overlap}{numebr of overlapped peak-gene pairs}
+#'   \item{oddsratio}{odds ratio in the two-by-two table}
+#'   \item{ratio}{overlapped pairs among all significant pairs from `res_df`}
+#'   \item{enr}{enrichment of overlapped pairs among significant pairs compared to all background pairs}
+#' }
+#' @export
+#'
+validate_with_assay <- function(res_df, sig_assay_gr,
+                                pvar = 'padj', p_cutoff = 0.2){
+  grange_peaks <- Signac::StringToGRanges(res_df$peak, sep = c('-', '-'))
+  sig_res_inds <- res_df[[pvar]] < p_cutoff
+
+  # evaluate the overlap between peaks
+  bovp = with(GenomicRanges::findOverlaps(grange_peaks, sig_assay_gr),
+              data.frame(d1_idx=queryHits,
+                         d2_idx=subjectHits))
+  sovp = with(GenomicRanges::findOverlaps(grange_peaks[sig_res_inds],
+                                          sig_assay_gr),
+              data.frame(d1_idx=queryHits,
+                         d2_idx=subjectHits))
+
+  # evaluate the overlap between peak-gene pairs
+  assay_sig_inds <- res_df$gene[sig_res_inds][sovp$d1_idx] == sig_assay_gr$gene[sovp$d2_idx]
+  n_assay_sig <- sum(assay_sig_inds, na.rm=T)
+  n_assay <- sum(res_df$gene[bovp$d1_idx] == sig_assay_gr$gene[bovp$d2_idx], na.rm=T)
+  res_gene_inds <- (res_df$gene %in% sig_assay_gr$gene)
+
+  # compute statistics on the significance of overlap
+  n_not_assay <- nrow(res_df[res_gene_inds,]) - n_assay
+  n_sig <- sum(sig_res_inds & res_gene_inds)
+
+  pval <- phyper(n_assay_sig, n_assay, n_not_assay, n_sig, lower.tail=F)
+  n_overlap <- n_assay_sig
+  ratio <- n_assay_sig/n_sig
+  enr <- (n_assay_sig/n_sig) / (n_assay/(n_assay+n_not_assay))
+  A <- n_assay_sig
+  B <- n_sig - A
+  C <- n_assay - A
+  D <- (n_assay+n_not_assay) - (A + B + C)
+  oddsratio <-  (A*D)/(B*C)
+  print(sprintf('p value from one-sided Fisher exact test: %.2e, #overlap: %i, odds ratio: %.2f',
+                pval, n_overlap, oddsratio))
+  return(c(pval = pval, n_overlap = n_overlap, oddsratio = oddsratio, ratio = ratio, enr = enr))
+}
