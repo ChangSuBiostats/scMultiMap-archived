@@ -69,6 +69,7 @@ Here, scMultiMap takes a Seurat object with two modalities: RNA and peak, and te
 
 Before demonstrating scMultiMap on real data, we note the requirement for peak counts. As discussed in "Discussion" in the [scMultiMap manuscript](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1), scMultiMap is designed to model **fragment counts**, which are amenable to count-based modeling and yield improved performance in downstream analysis compared to insertion counts or read counts ([Miao and Kim, 2024](https://www.nature.com/articles/s41592-023-02103-7), [Martens et al., 2024](https://www.nature.com/articles/s41592-023-02112-6)). Therefore, if you plan to use scMultiMap, please make sure the your scATAC-seq data are fragment counts instead of read counts. We recommend using MACS2 to call peaks which generates fragment counts, as shown in [Calling peaks](https://stuartlab.org/signac/articles/peak_calling). If you only have read counts, fragment counts can be estimated following [Martens et al., 2024](https://www.nature.com/articles/s41592-023-02112-6).
 
+
 To demonstrate this, we downloaded a 10x multiome data (paired scRNA-seq and scATAC-seq) from 10x, used MACS2 to call peaks by cell types, and generated `processed_seurat_obj_PBMC_10k.rds`. The source code for these steps can be found at  [scMultiMap reproducibility Github repo](https://github.com/ChangSuBiostats/scMultiMap_analysis/preprocessing/preprocess_10x_PBMC_data.R).
 <details>
 <summary>Codes from downloading data from 10x</summary>
@@ -107,13 +108,15 @@ We choose to study the top $2{,}000$ highly expressed genes and top $20{,}000$ h
 
 
 
-``` r
-pairs_df <- get_top_peak_gene_pairs(pbmc_cd14,
-                                    gene_top=2000, peak_top=20000,
+```{r eval=TRUE, include=TRUE}
+pairs_df <- get_top_peak_gene_pairs(pbmc_cd14, 
+                                    gene_top=2000, peak_top=20000, 
                                     distance = 5e+5,
-                                    gene_assay = 'RNA', # name of the gene assay
+                                    gene_assay = 'RNA', 
                                     peak_assay = 'peaks_ct') # name of the peak assay
 head(pairs_df)
+dim(pairs_df)
+```
 
 #>     gene                    peak
 #> 1 MALAT1 chr11-65614961-65616132
