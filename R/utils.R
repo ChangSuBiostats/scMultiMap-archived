@@ -110,3 +110,60 @@ validate_with_assay <- function(res_df, sig_assay_gr,
                 pval, n_overlap, oddsratio))
   return(c(pval = pval, n_overlap = n_overlap, oddsratio = oddsratio, ratio = ratio, enr = enr))
 }
+
+#' make_gene_to_peak_link
+#'
+#' make a data frame that links peak to a given gene as input to Signac::LinkPlot()
+#'
+#' @param df A data frame of peak-gene associations results, containing columns of `gene`, `peak`, and pvar (see below).
+#' @param gene Character, gene of interest.
+#' @param obj Seurat object that contains the data on the gene and the peaks.
+#' @param peak_assay Name for peak assay. Default to 'peak'.
+#'
+#' @return
+#' A grange object with genomic ranges corresponding to the gene and the peak, and with the following metadata:
+#' \describe{
+#'   \item{score}{correlation from the peak-gene association results}
+#'   \item{gene}{gene name}
+#'   \item{peak}{peak name}
+#'   \item{test_stat}{test statistics from the peak-gene association results`}
+#'   \item{pval}{p-value from the peak-gene association results}
+#' }
+#' @export
+#'
+make_gene_to_peak_link <- function(df, gene, obj, peak_assay='peak'){
+  # subset to the gene of interest
+  df <- df[df$gene == gene,]
+  # extract the start of the peak
+  tmp <- strsplit(df$peak, split='-')
+  chr <- sapply(tmp, function(pe) pe[1])
+  peak_start <- sapply(tmp, function(pe) pe[2])
+  # obtain gene TSS
+  # https://github.com/stuart-lab/signac/blob/HEAD/R/links.R#L281C1-L287C6
+  annot <- Signac::Annotation(object = obj[[peak_assay]])
+  gene.coords <- Signac:::CollapseToLongestTranscript(
+    ranges = annot
+  )
+  tmp <- as.data.frame(gene.coords[gene.coords$gene_name == gene])[1,]
+  gene.TSS <- ifelse(tmp$strand == '+', tmp$start, tmp$end)
+  # construct a dataframe of peak-gene links
+  gene_to_peak_df <- data.frame(chr = chr,
+                                start = peak_start,
+                                end = gene.TSS)
+  rev_inds <- gene_to_peak_df$start > gene_to_peak_df$end
+  tmp <- gene_to_peak_df$start[rev_inds]
+  gene_to_peak_df$start[rev_inds] <- gene_to_peak_df$end[rev_inds]
+  gene_to_peak_df$end[rev_inds] <- tmp
+  # convert the dataframe into a grange object
+  gene_to_peak_gr <- GenomicRanges::makeGRangesFromDataFrame(gene_to_peak_df,
+                                              seqnames.field='chr',
+                                              start.field="start",
+                                              end.field='end')
+  gene_to_peak_gr$score <- df$cor
+  gene_to_peak_gr$gene <- df$gene
+  gene_to_peak_gr$peak <- df$peak
+  gene_to_peak_gr$test_stat <- df$test_stat
+  gene_to_peak_gr$pval <- df$pval
+  return(gene_to_peak_gr)
+}
+
