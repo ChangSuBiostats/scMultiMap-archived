@@ -20,13 +20,14 @@
 #' @param verbose Whether to print detailed messages. Default to FALSE.
 #'
 #' @return
-#' A data frame of scMultiMap results with five columns.
+#' A data frame of scMultiMap results with six columns.
 #' \describe{
 #'   \item{gene}{gene in the peak-gene pair}
 #'   \item{peak}{peak in the peak-gene pair}
 #'   \item{pval}{p-value}
 #'   \item{test_stat}{test statistics}
 #'   \item{covar}{estimated covariance}
+#'   \item{cor}{estimated correlation}
 #' }
 #' Each row corresponds to one peak-gene pair's results from scMultiMap.
 #' \emph{pval} and \emph{test_stat} denote the statistical significance of peak-gene association,
@@ -88,7 +89,12 @@ scMultiMap <- function(obj, pairs_df,
       # remove pairs that do not overlap with the Seurat object
       pairs_df <- pairs_df[pairs_df[[i]] %in% int_features,]
     }
-    count_list[[mod]] <- Matrix::t(fcounts[int_features,,drop=F])
+    # Convert to a dense matrix since most operations below do not benefit from sparsity 
+    # (e.g., `X_centered = X - M` in scMultiMap_IRLS.R). 
+    # However, this approach may require substantial memory, especially for large single-cell datasets 
+    # with millions of cells. 
+    # TODO: we leave optimizing memory efficiency an area for future development.
+    count_list[[mod]] <- as.matrix(Matrix::t(fcounts[int_features,,drop=F]))
   }
 
   ##

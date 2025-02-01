@@ -35,7 +35,7 @@
 #' Cell-type-specific mapping of enhancer and target genes from single-cell multimodal data.
 #' Chang Su, Dongsoo Lee, Peng Jin, Jingfei Zhang;
 #' https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1
-scMultiMap_IRLS <- function(X, seq_depth, bsample=NULL, irls=T, verbose=F){
+scMultiMap_IRLS <- function(X, seq_depth, bsample=NULL, irls=T, verbose=Fq){
   if(is.null(dim(X))) X <- matrix(X, ncol = 1)
   if (is.null(seq_depth)) {
     seq_depth = apply(X, 1, sum, na.rm = T)
@@ -63,11 +63,8 @@ scMultiMap_IRLS <- function(X, seq_depth, bsample=NULL, irls=T, verbose=F){
   mu_mat <- matrix(NA, nrow = n_gene, ncol = n_bsample)
   M <- matrix(NA, nrow = n_cell, ncol = n_gene)
   tmp <- X * seq_depth
-  for(i_b in 1:n_bsample){
-    binds <- bind_mtx[,i_b]
-    mu_mat[, i_b] <- Matrix::colSums(tmp[binds,,drop=F])/sum(seq_depth_sq[binds])
-    M[binds, ] <- outer(seq_depth[binds], mu_mat[, i_b])
-  }
+  mu_mat <- t(Matrix::crossprod(bind_mtx, tmp) / Matrix::colSums(seq_depth_sq * bind_mtx))
+  M <- tcrossprod(seq_depth * bind_mtx, mu_mat)
   X_centered = X - M
   sigma2 = Matrix::colSums(((X_centered^2 - M) * seq_depth_sq))/seq_4
 
@@ -90,11 +87,8 @@ scMultiMap_IRLS <- function(X, seq_depth, bsample=NULL, irls=T, verbose=F){
       mu_mat <- matrix(NA, nrow = n_gene, ncol = n_bsample)
       num_tmp <- (X/w) * seq_depth
       deno_tmp <- seq_depth_sq/w
-      for(i_b in 1:n_bsample){
-        binds <- bind_mtx[,i_b]
-        mu_mat[, i_b] <- Matrix::colSums(num_tmp[binds,,drop=F])/Matrix::colSums(deno_tmp[binds,,drop=F])
-        M[binds, ] <- outer(seq_depth[binds], mu_mat[, i_b])
-      }
+      mu_mat <- t(Matrix::crossprod(bind_mtx, num_tmp)) / Matrix::crossprod(deno_tmp, bind_mtx)
+      M <- tcrossprod(seq_depth * bind_mtx, mu_mat)
       X_centered = X - M
       h = (M^2/theta_median + M)^2
       h[h <= 0] = 1

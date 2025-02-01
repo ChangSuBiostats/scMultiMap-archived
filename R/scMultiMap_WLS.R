@@ -45,12 +45,13 @@ scMultiMap_WLS <- function(count_list,
                            pairs_df,
                            irls_list,
                            verbose = F){
-  unique_genes <- unique(pairs_df[[1]])
-  print(sprintf('There are %i unique genes in the peak-gene pairs.', length(unique_genes)))
+  unique_genes <- unique(pairs_df$gene)
+  message(sprintf('There are %i unique genes in the peak-gene pairs.', length(unique_genes)))
   # for each gene, simultaneously infer its association with all neighboring peaks in pairs_df
   wls_res <- list()
+    
   for(g in unique_genes){
-    g_peaks <- pairs_df[[2]][pairs_df[[1]] == g]
+    g_peaks <- pairs_df$peak[pairs_df$gene == g]
     if(verbose) print(sprintf('%i peaks around gene %s', length(g_peaks), g))
     ##
     # prepare data input to WLS for each gene
@@ -82,6 +83,7 @@ scMultiMap_WLS <- function(count_list,
                                      w_gene, W_peak,
                                      var_gene, Var_peak,
                                      seq_depth_list[[1]], seq_depth_list[[2]])
+
     wls_df$gene <- g
     wls_df$peak <- g_peaks
     wls_df <- wls_df[, c('gene', 'peak', 'pval', 'test_stat', 'covar')]
