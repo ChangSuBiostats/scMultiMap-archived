@@ -1,3 +1,6 @@
+utils::globalVariables(c(".","seqnames", "start", "end", "strand", "gene_biotype", "gene_name"))
+
+
 #' get_top_peak_gene_pairs
 #'
 #' For peaks and genes with high abundance, construct candidate pairs where
@@ -28,7 +31,7 @@ get_top_peak_gene_pairs <- function(obj, gene_top=2000, peak_top=20000,
   # obtain gene locations
   # https://github.com/stuart-lab/signac/blob/HEAD/R/links.R#L281C1-L287C6
   annot <- Signac::Annotation(object = obj[[peak_assay]])
-  gene.coords <- Signac:::CollapseToLongestTranscript(
+  gene.coords <- CollapseToLongestTranscript(
     ranges = annot
   )
   peaks <- Signac::granges(x = obj[[peak_assay]])
@@ -39,7 +42,7 @@ get_top_peak_gene_pairs <- function(obj, gene_top=2000, peak_top=20000,
   # construct a peak-gene pair sparse matrix with where peaks and genes are within a certain distance
   # https://github.com/stuart-lab/signac/blob/HEAD/R/links.R#L351C3-L355C4
   suppressWarnings({
-  peak_distance_matrix <- Signac:::DistanceToTSS(
+  peak_distance_matrix <- DistanceToTSS(
     peaks = peaks[top_peaks],
     genes = gene.coords[match(int_gene_names, gene.coords$gene_name)],
     distance = distance
@@ -76,18 +79,18 @@ get_top_peak_gene_pairs <- function(obj, gene_top=2000, peak_top=20000,
 validate_with_assay <- function(res_df, sig_assay_gr,
                                 pvar = 'padj', p_cutoff = 0.2){
   grange_peaks <- Signac::StringToGRanges(res_df$peak, sep = c('-', '-'))
-  sig_res_inds <- which(res_df[[pvar]] < p_cutoff)
+  sig_res_inds <- res_df[[pvar]] < p_cutoff
 
   # evaluate the overlap between peaks
   bovp_gr = GenomicRanges::findOverlaps(grange_peaks, sig_assay_gr)
   bovp = data.frame(
-      d1_idx = queryHits(bovp_gr),
-      d2_idx = subjectHits(bovp_gr)
+      d1_idx = S4Vectors::queryHits(bovp_gr),
+      d2_idx = S4Vectors::subjectHits(bovp_gr)
   )
   sovp_gr <- GenomicRanges::findOverlaps(grange_peaks[sig_res_inds], sig_assay_gr)
   sovp = data.frame(
-      d1_idx = queryHits(sovp_gr),
-      d2_idx = subjectHits(sovp_gr)
+      d1_idx = S4Vectors::queryHits(sovp_gr),
+      d2_idx = S4Vectors::subjectHits(sovp_gr)
   )
   # evaluate the overlap between peak-gene pairs
   assay_sig_inds <- res_df$gene[sig_res_inds][sovp$d1_idx] == sig_assay_gr$gene[sovp$d2_idx]
@@ -99,7 +102,7 @@ validate_with_assay <- function(res_df, sig_assay_gr,
   n_not_assay <- nrow(res_df[res_gene_inds,]) - n_assay
   n_sig <- sum(sig_res_inds & res_gene_inds)
 
-  pval <- phyper(n_assay_sig, n_assay, n_not_assay, n_sig, lower.tail=F)
+  pval <- stats::phyper(n_assay_sig, n_assay, n_not_assay, n_sig, lower.tail=F)
   n_overlap <- n_assay_sig
   ratio <- n_assay_sig/n_sig
   enr <- (n_assay_sig/n_sig) / (n_assay/(n_assay+n_not_assay))
@@ -143,7 +146,7 @@ make_gene_to_peak_link <- function(df, gene, obj, peak_assay='peak'){
   # obtain gene TSS
   # https://github.com/stuart-lab/signac/blob/HEAD/R/links.R#L281C1-L287C6
   annot <- Signac::Annotation(object = obj[[peak_assay]])
-  gene.coords <- Signac:::CollapseToLongestTranscript(
+  gene.coords <- CollapseToLongestTranscript(
     ranges = annot
   )
   tmp <- as.data.frame(gene.coords[gene.coords$gene_name == gene])[1,]
@@ -169,3 +172,53 @@ make_gene_to_peak_link <- function(df, gene, obj, peak_assay='peak'){
   return(gene_to_peak_gr)
 }
 
+
+#' CollapseToLongestTranscript
+#'
+#' Obtain gene coordinates, a duplicate of Signac:::CollapseToLongestTranscript from Signac 1.14.0
+#'
+#' @param ranges Signac annotation
+#'
+#' @return A grange object of gene coordinates
+#' @export
+#'
+#' @import data.table
+CollapseToLongestTranscript <- function(ranges) {
+    range.df <- as.data.table(x = ranges)
+    range.df$strand <- as.character(x = range.df$strand)
+    range.df$strand <- ifelse(test = range.df$strand == "*", 
+        yes = "+", no = range.df$strand)
+    collapsed <- range.df[, .(unique(seqnames), min(start), max(end), 
+        strand[[1]], gene_biotype[[1]], gene_name[[1]]), "gene_id"]
+    colnames(x = collapsed) <- c("gene_id", "seqnames", "start", 
+        "end", "strand", "gene_biotype", "gene_name")
+    collapsed$gene_name <- make.unique(names = collapsed$gene_name)
+    gene.ranges <- GenomicRanges::makeGRangesFromDataFrame(df = collapsed, keep.extra.columns = TRUE)
+    return(gene.ranges)
+}
+
+# Find peaks near genes
+#
+# Find peaks that are within a given distance threshold to each gene
+# a duplicate of Signac:::DistanceToTSS from Signac 1.14.0
+#
+# @param peaks A GRanges object containing peak coordinates
+# @param genes A GRanges object containing gene coordinates
+# @param distance Distance threshold. Peaks within this distance from the gene
+# will be recorded.
+# @param sep Separator for peak names when creating results matrix
+#
+# @return Returns a sparse matrix
+DistanceToTSS <- function (peaks, genes, distance = 2e+05, sep = c("-", "-")) {
+    tss <- GenomicRanges::resize(x = genes, width = 1, fix = "start")
+    genes.extended <- suppressWarnings(expr = Signac::Extend(x = tss, 
+        upstream = distance, downstream = distance))
+    overlaps <- GenomicRanges::findOverlaps(query = peaks, subject = genes.extended, 
+        type = "any", select = "all")
+    hit_matrix <- Matrix::sparseMatrix(i = S4Vectors::queryHits(x = overlaps), j = S4Vectors::subjectHits(x = overlaps), 
+        x = 1, dims = c(length(x = peaks), length(x = genes.extended)))
+    rownames(x = hit_matrix) <- Signac::GRangesToString(grange = peaks, 
+        sep = sep)
+    colnames(x = hit_matrix) <- genes.extended$gene_name
+    return(hit_matrix)
+}
