@@ -24,9 +24,9 @@
 #' # The following codes illustrate the use of `scMultiMap_IRLS` with toy datasets
 #' # `small_obj` provided in this R package.
 #' irls_list <- list()
-#' irls_list[['gene']] <- scMultiMap_IRLS(Matrix::t(small_obj[['RNA']]$counts),
+#' irls_list[['gene']] <- scMultiMap_IRLS(t(as.matrix(small_obj[['RNA']]$counts)),
 #'  Matrix::colSums(small_obj[['RNA']]$counts))
-#' irls_list[['peak']] <- scMultiMap_IRLS(Matrix::t(small_obj[['peak']]$counts),
+#' irls_list[['peak']] <- scMultiMap_IRLS(t(as.matrix(small_obj[['peak']]$counts)),
 #'  Matrix::colSums(small_obj[['peak']]$counts))
 #' print(str(irls_list[['gene']])) # estimated mean and variance for genes
 #' print(str(irls_list[['peak']])) # estimated mean and variance for peaks
@@ -35,7 +35,7 @@
 #' Cell-type-specific mapping of enhancer and target genes from single-cell multimodal data.
 #' Chang Su, Dongsoo Lee, Peng Jin, Jingfei Zhang;
 #' https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1
-scMultiMap_IRLS <- function(X, seq_depth, bsample=NULL, irls=T, verbose=Fq){
+scMultiMap_IRLS <- function(X, seq_depth, bsample=NULL, irls=T, verbose=F){
   if(is.null(dim(X))) X <- matrix(X, ncol = 1)
   if (is.null(seq_depth)) {
     seq_depth = apply(X, 1, sum, na.rm = T)
@@ -63,10 +63,10 @@ scMultiMap_IRLS <- function(X, seq_depth, bsample=NULL, irls=T, verbose=Fq){
   mu_mat <- matrix(NA, nrow = n_gene, ncol = n_bsample)
   M <- matrix(NA, nrow = n_cell, ncol = n_gene)
   tmp <- X * seq_depth
-  mu_mat <- t(Matrix::crossprod(bind_mtx, tmp) / Matrix::colSums(seq_depth_sq * bind_mtx))
+  mu_mat <- t(crossprod(bind_mtx, tmp) / colSums(seq_depth_sq * bind_mtx))
   M <- tcrossprod(seq_depth * bind_mtx, mu_mat)
   X_centered = X - M
-  sigma2 = Matrix::colSums(((X_centered^2 - M) * seq_depth_sq))/seq_4
+  sigma2 = colSums(((X_centered^2 - M) * seq_depth_sq))/seq_4
 
   if(irls){
     theta = mu_mat^2/sigma2
@@ -87,12 +87,12 @@ scMultiMap_IRLS <- function(X, seq_depth, bsample=NULL, irls=T, verbose=Fq){
       mu_mat <- matrix(NA, nrow = n_gene, ncol = n_bsample)
       num_tmp <- (X/w) * seq_depth
       deno_tmp <- seq_depth_sq/w
-      mu_mat <- t(Matrix::crossprod(bind_mtx, num_tmp)) / Matrix::crossprod(deno_tmp, bind_mtx)
+      mu_mat <- t(crossprod(bind_mtx, num_tmp)[, , drop = FALSE]) / crossprod(deno_tmp, bind_mtx)[, , drop = FALSE]
       M <- tcrossprod(seq_depth * bind_mtx, mu_mat)
       X_centered = X - M
       h = (M^2/theta_median + M)^2
       h[h <= 0] = 1
-      sigma2 = Matrix::colSums(((X_centered^2 - M)/h * seq_depth_sq))/Matrix::colSums(seq_depth_sq^2/h)
+      sigma2 = colSums(((X_centered^2 - M)/h * seq_depth_sq))/ colSums(seq_depth_sq^2/h)
       theta = mu_mat^2/sigma2
       j = j+1
       delta = max(abs(log((theta/theta_previous)[theta > 0 & theta_previous > 0])), na.rm = T)
