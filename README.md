@@ -2,6 +2,8 @@
 
 `scMultiMap` is an R package for inferring cell-type-specific peak-gene associations using single-cell multimodal data. It implements the statistical method proposed in th manuscript [Cell-type-specific mapping of enhancer and target genes from single-cell multimodal data](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1), currently under revision at *Nature Communications*.
 
+To reproduce the analysis in  [Cell-type-specific mapping of enhancer and target genes from single-cell multimodal data](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1), please visit our dedicated GitHub repository containing the source code used in the paper: [scMultiMap_analysis](https://changsubiostats.github.io/scMultiMap).
+
 ## Installation
 
 You can install `scMultiMap` from GitHub using `devtools`:
@@ -27,6 +29,7 @@ The following vignettes provide detailed use cases for `scMultiMap`:
 3. [scMultiMap for integrative analysis with GWAS results](https://changsubiostats.github.io/scMultiMap/articles/GWAS.html): 
   Integrate `scMultiMap` results with genome-wide association studies (GWAS) to explore the regulatory roles of GWAS variants in disease-associated cell types.
 
+
 ## Contact us
 
 For questions or feedback, please contact:
@@ -34,4 +37,4 @@ For questions or feedback, please contact:
 
 ## Reference and Updates
 
-Chang Su, Dongsoo Lee, Peng Jin and Jingfei Zhang. (2024). [Cell-type-specific mapping of enhancer and target genes from single-cell multimodal data.](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1). Manuscript under revision at *Nature Communications*.
+Chang Su, Dongsoo Lee, Peng Jin and Jingfei Zhang. (2024). [Cell-type-specific mapping of enhancer and target genes from single-cell multimodal data](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1). Manuscript under revision at *Nature Communications*.
