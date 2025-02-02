@@ -15,13 +15,16 @@ LazyData: true
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    Seurat,
+    GenomicRanges,
+    S4Vectors
 Config/testthat/edition: 3
 Imports: 
     Matrix,
-    Seurat,
     Signac,
-    stats
+    stats,
+    data.table
 VignetteBuilder: knitr
 URL: https://changsubiostats.github.io/scMultiMap/
 Config/Needs/website: rmarkdown

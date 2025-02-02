@@ -6,3 +6,5 @@
 .quarto
 inst/doc
 docs
+**/.ipynb_checkpoints/
+vignettes/articles/figures/
