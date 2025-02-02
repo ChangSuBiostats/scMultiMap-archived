@@ -1,27 +1,37 @@
 # scMultiMap
 
-`scMultiMap` is an R package for inferring cell-type-specific peak-gene association with single-cell multimodal data. It provides an implementation for the statistical method scMultiMap proposed in this manuscript: https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1.
+`scMultiMap` is an R package for inferring cell-type-specific peak-gene associations using single-cell multimodal data. It implements the statistical method proposed in th manuscript [Cell-type-specific mapping of enhancer and target genes from single-cell multimodal data](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1), currently under revision at *Nature Communications*.
 
 ## Installation
 
-`scMultiMap` is available on GitHub. You can install it using
+You can install `scMultiMap` from GitHub using `devtools`:
 
 ``` r
-## Load devtools for installing R packages from Github
+# Load devtools for installing R packages from GitHub
 library(devtools)
-## Install CS-CORE from Github
+
+# Install scMultiMap from GitHub
 install_github("ChangSuBiostats/scMultiMap")
 ```
 
 ## Vignettes
 
-The [vignette](https://changsubiostats.github.io/scMultiMap/articles/scMultiMap.html) shows a basic example of using scMultiMap for inferring peak-gene associations in cell types using 10x multiome data on PBMC. **The vignettes in this package are currently under active development. More examples are coming soon!**
+The following vignettes provide detailed use cases for `scMultiMap`:
+
+1. [Introduction to scMultiMap](https://changsubiostats.github.io/scMultiMap/articles/scMultiMap.html): 
+  Learn how to infer peak-gene associations in cell types using 10x Multiome data on PBMC.
+
+2. [scMultiMap for disease-control studies](https://changsubiostats.github.io/scMultiMap/articles/disease_control.html):
+  Identify differentially associated peak-gene pairs in disease-control studies.
+
+3. [scMultiMap for integrative analysis with GWAS results](https://changsubiostats.github.io/scMultiMap/articles/GWAS.html): 
+  Integrate `scMultiMap` results with genome-wide association studies (GWAS) to explore the regulatory roles of GWAS variants in disease-associated cell types.
 
 ## Contact us
 
+For questions or feedback, please contact:
 [Chang Su](www.changsu.org), <chang.su@emory.edu>
 
-## Reference and news
+## Reference and Updates
 
-**Cell-type-specific mapping of enhancer and target genes from single-cell multimodal data.**
-Chang Su, Dongsoo Lee, Peng Jin and Jingfei Zhang. 2024. https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1
+Chang Su, Dongsoo Lee, Peng Jin and Jingfei Zhang. (2024). [Cell-type-specific mapping of enhancer and target genes from single-cell multimodal data.](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1). Manuscript under revision at *Nature Communications*.
