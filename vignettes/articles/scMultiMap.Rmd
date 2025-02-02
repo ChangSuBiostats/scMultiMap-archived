@@ -130,7 +130,6 @@ Here, we generated 32296 candidate peak-gene pairs generated based on the criter
 
 Nect, we run `scMultiMap` to assess peak-gene associations.
 
-<<<<<<< HEAD
 
 ``` r
 scMultiMap_res <- scMultiMap(pbmc_cd14, pairs_df,
