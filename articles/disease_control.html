@@ -30,6 +30,14 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../articles/scMultiMap.html">Get started</a></li>
+<li class="active nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-vignettes" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Vignettes</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-vignettes">
+<li><a class="dropdown-item" href="../articles/scMultiMap.html">Introduction to scMultiMap</a></li>
+    <li><a class="dropdown-item" href="../articles/disease_control.html">scMultiMap for disease-control studies</a></li>
+    <li><a class="dropdown-item" href="../articles/GWAS.html">scMultiMap for integrative analysis with GWAS results</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav"></ul>
@@ -76,7 +84,7 @@ in microglia”). We illustrate the codes for this analysis here. At the
 end of this vignette, we will generate Figures 4b from the
 manuscript.</p>
 <div class="section level2">
-<h2 id="load-pre-processed-data">1. Load pre-processed data<a class="anchor" aria-label="anchor" href="#load-pre-processed-data"></a>
+<h2 id="load-pre-processed-data">Load pre-processed data<a class="anchor" aria-label="anchor" href="#load-pre-processed-data"></a>
 </h2>
 <p>We downloaded the single-cell Multiome data on brain from an
 Alzheimer’s disease study <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10025452/" class="external-link">Anderson et
@@ -114,7 +122,7 @@ criterion above. The users can also customize the peak-gene pairs based
 on your analysis goal.</p>
 </div>
 <div class="section level2">
-<h2 id="differential-association-analysis">3. Differential association analysis<a class="anchor" aria-label="anchor" href="#differential-association-analysis"></a>
+<h2 id="differential-association-analysis">Differential association analysis<a class="anchor" aria-label="anchor" href="#differential-association-analysis"></a>
 </h2>
 <p>Next, we estimate peak-gene associations in microglia from the
 control and the Alzheimer’s disease groups, respectively. Note that
@@ -227,10 +235,13 @@ of times that the “observed difference” is larger in magnitude than the
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>cex <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">permu_pval</span>, main <span class="op">=</span> <span class="st">'Permutation p-values'</span>, breaks <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
-<p><img src="figures/dc_pval.png" width="360" height="360"></p>
+<div class="float">
+<img src="./articles/figures/dc_pval.png" width="360" height="360" alt="Distribution of differential association p-values"><div class="figcaption">Distribution of differential association
+p-values</div>
+</div>
 </div>
 <div class="section level2">
-<h2 id="downstream-analysis-of-differentially-associated-peak-gene-pairs">4. Downstream analysis of differentially associated peak-gene
+<h2 id="downstream-analysis-of-differentially-associated-peak-gene-pairs">Downstream analysis of differentially associated peak-gene
 pairs<a class="anchor" aria-label="anchor" href="#downstream-analysis-of-differentially-associated-peak-gene-pairs"></a>
 </h2>
 <div class="section level3">
@@ -318,7 +329,10 @@ have a difference of correlation greater than 0.2.</p>
 <span>            show_colnames <span class="op">=</span> <span class="cn">F</span>, show_rownames <span class="op">=</span> <span class="cn">T</span>, <span class="co"># displaying column and row names</span></span>
 <span>            cellheight<span class="op">=</span><span class="fl">50</span>, treeheight_col <span class="op">=</span> <span class="fl">15</span>,</span>
 <span>            fontsize <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="figures/dc_heatmap.png" style="width:65.0%"></p>
+<div class="float">
+<img src="./articles/figures/dc_heatmap.png" style="width:65.0%" alt="Heatmap of differential peak-gene association"><div class="figcaption">Heatmap of differential peak-gene
+association</div>
+</div>
 <p>This reproduced Figure~4b in the scMultiMap’s <a href="https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1" class="external-link">manuscript</a>.</p>
 <p>These differentially associated peak-gene pairs can be further
 analyzed with GWAS (Genome-wide association studies) results, to
