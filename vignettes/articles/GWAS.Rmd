@@ -2,16 +2,12 @@
 title: "scMultiMap for integrative analysis with GWAS results"
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-```
+
 
 This vignette demonstrates how to apply scMultiMap to map associated peak-gene pairs and integrate the results with genome-wide association studies (GWAS) to elucidate the regulatory functions of GWAS variants in disease-associated cell types. As an example, we will reproduce the results from the [scMultiMap manuscript](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1), specifically those presented in the section 'scMultiMap mapped GWAS variants of Alzheimerâ€™s disease to target genes in microglia.' At the end of this vignette, we will generate Figures 4d and 4e from the manuscript.
 
-```{r setup, warning = FALSE, message = FALSE}
+
+``` r
 library(scMultiMap)
 library(Signac)
 library(Seurat)
@@ -29,7 +25,8 @@ Over 75 genetic loci have been associated with the risk of developing Alzheimerâ
 
 Note: this vignette use the same dataset as in [vignette: scMultiMap for disease-control studies](disease_control.html). Please refer to it for details on pre-processing data and running `scMultiMap`.
 
-```{r eval=F, include=T}
+
+``` r
 # set it to the directory where data are saved
 data_dir <- '../../../data' 
 
@@ -40,16 +37,12 @@ ct <- 'Microglia'
 ct_obj <- subset(x = obj, subset = predicted.id == ct)
 ```
 
-```{r include=F}
-data_dir <- '../../../data'
-ct_obj <- readRDS(sprintf('%s/Microglia_seurat_obj.rds', data_dir))
-ct_control <- subset(x = ct_obj, subset = Diagnosis == 'Unaffected')
-ct_AD <- subset(x = ct_obj, subset = Diagnosis == "Alzheimer's")
-```
+
 
 In this analysis, we study the top 5000 highly expressed genes and top 50000 highly accessible peaks in microglia, and use a cis-region of width 1Mb to define candidate peak-gene pairs. 
 
-```{r}
+
+``` r
 pairs_df <- get_top_peak_gene_pairs(ct_control,
                                     gene_top=5000, peak_top=50000,
                                     distance = 5e+5,
@@ -59,22 +52,36 @@ pairs_df <- get_top_peak_gene_pairs(ct_control,
 # One can also use all microglia.
 ```
 
-Here, we generated `r nrow(pairs_df)` candidate peak-gene pairs based on the criterion above. The users can also customize the peak-gene pairs based on your analysis goal.
+Here, we generated 135401 candidate peak-gene pairs based on the criterion above. The users can also customize the peak-gene pairs based on your analysis goal.
 
 Next, we estimate peak-gene associations in microglia from the control and the Alzheimer's disease groups, respectively. Note that there are multiple biological samples in this dataset, so `scMultiMap` should be run with `bsample` to avoid spurious associations due to heterogeneity across biological samples (see Methods in scMultiMap's [manuscript](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1) for more details).
 
-```{r}
+
+``` r
 # multiple biological samples
 table(ct_obj$id)
+#> 
+#>     1224     1230     1238     3329     3586     4305     4313     4443 
+#>      201      161      283      211      152      347       17      171 
+#>     4481     4482     4627 HCT17HEX   HCTZZT   NT1261   NT1271 
+#>      233      415      241      264       26      192      265
 ```
 
-```{r eval=T}
+
+``` r
 # control
 control_res <- scMultiMap(ct_control, 
                           pairs_df,
                           bsample = 'id',
                           gene_assay = 'RNA',
                           peak_assay = 'peaks')
+#> Start step 1: IRLS
+#> Start IRLS for RNA
+#> Start IRLS for peaks
+#> Start step 2: WLS
+#> There are 4652 unique genes in the peak-gene pairs.
+#> Warning in sqrt(deno): NaNs produced
+#> scMultiMap elapsed time: 01:13 (mm:ss)
 
 # disease
 disease_res <- scMultiMap(ct_AD, 
@@ -82,14 +89,15 @@ disease_res <- scMultiMap(ct_AD,
                           bsample = 'id',
                           gene_assay = 'RNA',
                           peak_assay = 'peaks')
+#> Start step 1: IRLS
+#> Start IRLS for RNA
+#> Start IRLS for peaks
+#> Start step 2: WLS
+#> There are 4652 unique genes in the peak-gene pairs.
+#> scMultiMap elapsed time: 01:16 (mm:ss)
 ```
 
-```{r include=F, eval=F}
-#saveRDS(list(control_res, disease_res), sprintf('%s/gwas_scmultimap_res.rds', data_dir))
-res_list <- readRDS(sprintf('%s/gwas_scmultimap_res.rds', data_dir))
-control_res <- res_list[[1]]
-disease_res <- res_list[[2]]
-```
+
 
 <details>
 <summary>What does "Warning in sqrt(deno): NaNs produced" mean?</summary>
@@ -100,7 +108,8 @@ This warning suggests that some peaks or genes have variance estimated to be neg
 
 # Load results on fine-mapped AD GWAS variants
 
-```{r}
+
+``` r
 # AD GWAS variants fine-mapped and priortized based on eQTL & Hi-C
 # "Seeding from PAINTOR or FGWAS 95% credible set variants (Sup- plementary Table 6b), 
 # we first included their linkage disequilibrium (LD) tags (defined as LD R2 > 0.8) in TOP-LD European (EUR) 
@@ -122,14 +131,16 @@ grange_mic_fm_prior <- GenomicRanges::makeGRangesFromDataFrame(df = mic_fm_prior
 
 ## PICALM locus (figure 4d)
 
-```{r}
+
+``` r
 # make grange objects that connect genes with peaks
 gene_peak_link_gr_control <- make_gene_to_peak_link(control_res, 'PICALM', ct_control, 'peaks')
 gene_peak_link_gr_AD <- make_gene_to_peak_link(disease_res, 'PICALM', ct_AD, 'peaks')
 gene_peak_link_list <- list(AD = gene_peak_link_gr_AD, control = gene_peak_link_gr_control)
 ```
 
-```{r}
+
+``` r
 uniform_fs <- 20
 # genomic region around PICALM locus
 selected_range <- "chr11-85850000-86216290"
@@ -154,9 +165,14 @@ for(g in c('control','AD')){
     labs(color = 'correlation', y = sprintf('%s', g)) +
     theme(text = element_text(size = uniform_fs))
 }
+#> Scale for colour is already present.
+#> Adding another scale for colour, which will replace the existing scale.
+#> Scale for colour is already present.
+#> Adding another scale for colour, which will replace the existing scale.
 ```
 
-```{r}
+
+``` r
 expr_plot <- ExpressionPlot(
   object = ct_obj,
   features = "PICALM",
@@ -181,7 +197,8 @@ snp_plot <- PeakPlot(
     theme(text = element_text(size = uniform_fs))
 ```
 
-```{r eval=F}
+
+``` r
 g <- CombineTracks(plotlist = list(gene_plot, snp_plot, link_plot_list[[1]], link_plot_list[[2]]),
                    expression.plot = expr_plot,
                    heights = c(2,1,2,2) * 5/7,
@@ -189,13 +206,7 @@ g <- CombineTracks(plotlist = list(gene_plot, snp_plot, link_plot_list[[1]], lin
 g
 ```
 
-```{r eval=T, include=F}
-g <- CombineTracks(plotlist = list(gene_plot, snp_plot, link_plot_list[[1]], link_plot_list[[2]]),
-                   expression.plot = expr_plot,
-                   heights = c(2,1,2,2) * 5/7,
-                   widths = c(6.5, 1))
-ggsave('figures/PICALM_links.png', g, width = 7.5, height = 5)
-```
+
 
 ![](figures/PICALM_links.png){width=65%}
 
@@ -206,14 +217,16 @@ This reproduced Figure~4d in the scMultiMap's [manuscript](https://www.biorxiv.o
 
 Repeat the analysis above for the INPP5D locus.
 
-```{r}
+
+``` r
 # make grange objects that connect genes with peaks
 gene_peak_link_gr_control <- make_gene_to_peak_link(control_res, 'INPP5D', ct_control, 'peaks')
 gene_peak_link_gr_AD <- make_gene_to_peak_link(disease_res, 'INPP5D', ct_AD, 'peaks')
 gene_peak_link_list <- list(AD = gene_peak_link_gr_AD, control = gene_peak_link_gr_control)
 ```
 
-```{r}
+
+``` r
 uniform_fs <- 20
 # genomic region around INPP5D locus
 selected_range <- "chr2-232850000-233259353"
@@ -238,9 +251,14 @@ for(g in c('control','AD')){
     labs(color = 'correlation', y = sprintf('%s', g)) +
     theme(text = element_text(size = uniform_fs))
 }
+#> Scale for colour is already present.
+#> Adding another scale for colour, which will replace the existing scale.
+#> Scale for colour is already present.
+#> Adding another scale for colour, which will replace the existing scale.
 ```
 
-```{r}
+
+``` r
 expr_plot <- ExpressionPlot(
   object = ct_obj,
   features = "INPP5D",
@@ -265,7 +283,8 @@ snp_plot <- PeakPlot(
     theme(text = element_text(size = uniform_fs))
 ```
 
-```{r eval=F}
+
+``` r
 g <- CombineTracks(plotlist = list(gene_plot, snp_plot, link_plot_list[[1]], link_plot_list[[2]]),
                    expression.plot = expr_plot,
                    heights = c(2,1,2,2) * 5/7,
@@ -273,13 +292,7 @@ g <- CombineTracks(plotlist = list(gene_plot, snp_plot, link_plot_list[[1]], lin
 g
 ```
 
-```{r eval=T, include=F}
-g <- CombineTracks(plotlist = list(gene_plot, snp_plot, link_plot_list[[1]], link_plot_list[[2]]),
-                   expression.plot = expr_plot,
-                   heights = c(2,1,2,2) * 5/7,
-                   widths = c(6.5, 1))
-ggsave('figures/INPP5D_links.png', g, width = 7.5, height = 5)
-```
+
 
 ![](figures/INPP5D_links.png){width=65%}
 
