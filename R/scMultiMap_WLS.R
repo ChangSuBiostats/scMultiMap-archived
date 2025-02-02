@@ -30,8 +30,8 @@
 #' @export
 #'
 #' @examples
-#' count_list <- list(gene = Matrix::t(small_obj[['RNA']]$counts),
-#'  peak = Matrix::t(small_obj[['peak']]$counts))
+#' count_list <- list(gene = t(as.matrix(small_obj[['RNA']]$counts)),
+#'  peak = t(as.matrix(small_obj[['peak']]$counts)))
 #' seq_depth_list <- list(gene = Matrix::colSums(small_obj[['RNA']]$counts),
 #'  peak = Matrix::colSums(small_obj[['peak']]$counts))
 #' wls_res <- scMultiMap_WLS(count_list, seq_depth_list, small_pairs_df, small_irls_list)
