@@ -41,9 +41,9 @@ estimate and infer the association between genes and peaks.
 # The following codes illustrate the use of `scMultiMap_IRLS` with toy datasets
 # `small_obj` provided in this R package.
 irls_list <- list()
-irls_list[['gene']] <- scMultiMap_IRLS(Matrix::t(small_obj[['RNA']]$counts),
+irls_list[['gene']] <- scMultiMap_IRLS(t(as.matrix(small_obj[['RNA']]$counts)),
  Matrix::colSums(small_obj[['RNA']]$counts))
-irls_list[['peak']] <- scMultiMap_IRLS(Matrix::t(small_obj[['peak']]$counts),
+irls_list[['peak']] <- scMultiMap_IRLS(t(as.matrix(small_obj[['peak']]$counts)),
  Matrix::colSums(small_obj[['peak']]$counts))
 print(str(irls_list[['gene']])) # estimated mean and variance for genes
 print(str(irls_list[['peak']])) # estimated mean and variance for peaks
