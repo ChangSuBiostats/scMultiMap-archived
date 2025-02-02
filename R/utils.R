@@ -76,17 +76,19 @@ get_top_peak_gene_pairs <- function(obj, gene_top=2000, peak_top=20000,
 validate_with_assay <- function(res_df, sig_assay_gr,
                                 pvar = 'padj', p_cutoff = 0.2){
   grange_peaks <- Signac::StringToGRanges(res_df$peak, sep = c('-', '-'))
-  sig_res_inds <- res_df[[pvar]] < p_cutoff
+  sig_res_inds <- which(res_df[[pvar]] < p_cutoff)
 
   # evaluate the overlap between peaks
-  bovp = with(GenomicRanges::findOverlaps(grange_peaks, sig_assay_gr),
-              data.frame(d1_idx=queryHits,
-                         d2_idx=subjectHits))
-  sovp = with(GenomicRanges::findOverlaps(grange_peaks[sig_res_inds],
-                                          sig_assay_gr),
-              data.frame(d1_idx=queryHits,
-                         d2_idx=subjectHits))
-
+  bovp_gr = GenomicRanges::findOverlaps(grange_peaks, sig_assay_gr)
+  bovp = data.frame(
+      d1_idx = queryHits(bovp_gr),
+      d2_idx = subjectHits(bovp_gr)
+  )
+  sovp_gr <- GenomicRanges::findOverlaps(grange_peaks[sig_res_inds], sig_assay_gr)
+  sovp = data.frame(
+      d1_idx = queryHits(sovp_gr),
+      d2_idx = subjectHits(sovp_gr)
+  )
   # evaluate the overlap between peak-gene pairs
   assay_sig_inds <- res_df$gene[sig_res_inds][sovp$d1_idx] == sig_assay_gr$gene[sovp$d2_idx]
   n_assay_sig <- sum(assay_sig_inds, na.rm=T)
