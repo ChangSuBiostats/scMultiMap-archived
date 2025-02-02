@@ -180,7 +180,6 @@ make_gene_to_peak_link <- function(df, gene, obj, peak_assay='peak'){
 #' @param ranges Signac annotation
 #'
 #' @return A grange object of gene coordinates
-#' @export
 #'
 #' @import data.table
 CollapseToLongestTranscript <- function(ranges) {
@@ -197,18 +196,18 @@ CollapseToLongestTranscript <- function(ranges) {
     return(gene.ranges)
 }
 
-# Find peaks near genes
-#
-# Find peaks that are within a given distance threshold to each gene
-# a duplicate of Signac:::DistanceToTSS from Signac 1.14.0
-#
-# @param peaks A GRanges object containing peak coordinates
-# @param genes A GRanges object containing gene coordinates
-# @param distance Distance threshold. Peaks within this distance from the gene
-# will be recorded.
-# @param sep Separator for peak names when creating results matrix
-#
-# @return Returns a sparse matrix
+#' Find peaks near genes
+#'
+#' Find peaks that are within a given distance threshold to each gene
+#' a duplicate of Signac:::DistanceToTSS from Signac 1.14.0
+#'
+#' @param peaks A GRanges object containing peak coordinates
+#' @param genes A GRanges object containing gene coordinates
+#' @param distance Distance threshold. Peaks within this distance from the gene
+#' will be recorded.
+#' @param sep Separator for peak names when creating results matrix
+#'
+#' @return Returns a sparse matrix
 DistanceToTSS <- function (peaks, genes, distance = 2e+05, sep = c("-", "-")) {
     tss <- GenomicRanges::resize(x = genes, width = 1, fix = "start")
     genes.extended <- suppressWarnings(expr = Signac::Extend(x = tss, 
