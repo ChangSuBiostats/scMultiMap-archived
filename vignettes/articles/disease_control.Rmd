@@ -1,5 +1,10 @@
 ---
 title: "scMultiMap for disease-control studies"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{scMultiMap for disease-control studies}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 
@@ -21,7 +26,7 @@ library(RColorBrewer)
 
 In scMultiMap's [manuscript](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1), we applied a permutation procedure to identify significantly differentially associated peak-gene pairs between microglia from healthy control subjects and subjects with Alzheimer's disease (Results section "scMultiMap mapped GWAS variants of Alzheimer’s disease to target genes in microglia"). We illustrate the codes for this analysis here. At the end of this vignette, we will generate Figures 4b from the manuscript.
 
-# 1. Load pre-processed data
+# Load pre-processed data
 
 We downloaded the single-cell Multiome data on brain from an Alzheimer's disease study [Anderson et al.](https://pmc.ncbi.nlm.nih.gov/articles/PMC10025452/), which is the same dataset we used in the manuscript ([GSE214979](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE214979)). We further re-called peaks by cell types with MACS2 using the codes at the [scMultiMap reproducibility Github repo](https://github.com/ChangSuBiostats/scMultiMap_analysis/preprocessing/preprocess_10x_PBMC_data.R). Calling peaks by cell types generates cell-type-specific peaks that better represent candidate cell-type-specific enhancers than those identified with all cell types merged, which may obscure signals from less abundant cell types such as microglia. Using MACS2 provides the fragment counts required for running `scMultiMap` (see discussion [here](scMultiMap.html)).
 
@@ -54,7 +59,7 @@ pairs_df <- get_top_peak_gene_pairs(subset(x = ct_obj, subset = Diagnosis == 'Un
 
 Here, we generated 135401 candidate peak-gene pairs based on the criterion above. The users can also customize the peak-gene pairs based on your analysis goal.
 
-# 3. Differential association analysis
+# Differential association analysis
 
 Next, we estimate peak-gene associations in microglia from the control and the Alzheimer's disease groups, respectively. Note that there are multiple biological samples in each group, so `scMultiMap` should be run with `bsample` to avoid spurious associations due to heterogeneity across biological samples (see Methods in scMultiMap's [manuscript](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1) for more details).
 
@@ -180,9 +185,9 @@ permu_pval <- pmin(pval1, pval2) * 2
 par(cex = 1.5)
 hist(permu_pval, main = 'Permutation p-values', breaks = 10)
 ```
-![](figures/dc_pval.png){width=360 height=360}
+![Distribution of differential association p-values](./vignettes/figures/dc_pval.png){width=360 height=360}
 
-# 4. Downstream analysis of differentially associated peak-gene pairs
+# Downstream analysis of differentially associated peak-gene pairs
 
 ## Enrichment of differentially expressed genes
 We assess if genes with differential association are enriched for differential expression.
@@ -276,7 +281,7 @@ g <- pheatmap(t(coexp_mat[DEG_inds & subset_inds,]),
 
 
 
-![](figures/dc_heatmap.png){width=65%}
+![Heatmap of differential peak-gene association](./vignettes/figures/dc_heatmap.png){width=65%}
 
 This reproduced Figure~4b in the scMultiMap's [manuscript](https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1). 
 

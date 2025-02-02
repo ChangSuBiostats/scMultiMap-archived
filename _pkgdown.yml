@@ -4,7 +4,7 @@ template:
   bootswatch: simplex
 
 articles:
-  - title: "Getting Started"
+  - title: "Introduction to scMultiMap"
     contents:
       - articles/scMultiMap
   - title: "scMultiMap for disease-control studies"
@@ -19,14 +19,15 @@ navbar:
     left:
     - home
     - intro
+    - articles
     - reference
     - news
     right: github
-    components:
-      articles:
-        text: Articles
-        menu:
-        - text: "Getting Started"
+  components:
+    articles:
+      text: Vignettes
+      menu:
+        - text: "Introduction to scMultiMap"
           href: articles/scMultiMap.html
         - text: "scMultiMap for disease-control studies"
           href: articles/disease_control.html
@@ -41,7 +42,7 @@ home:
   links:
   - text: scMultiMap manuscript
     href: https://www.biorxiv.org/content/10.1101/2024.09.24.614814v1
-  - text: Su lab
+  - text: Chang Su's homepage
     href: https://www.changsu.org
 reference:
 - title: scMultiMap functions

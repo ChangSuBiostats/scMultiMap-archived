@@ -1,5 +1,10 @@
 ---
-title: "scMultiMap"
+title: "Introduction to scMultiMap"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to scMultiMap}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 
