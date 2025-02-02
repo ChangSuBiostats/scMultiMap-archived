@@ -7,3 +7,5 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^.*\.ipynb_checkpoints(/.*)?$
+^vignettes/articles/figures/$
